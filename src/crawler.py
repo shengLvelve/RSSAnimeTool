@@ -87,6 +87,7 @@ def get_anime_info(episodeData:dao.episode):
             month = 1
         month = math.floor(month/3)*3+1
         source = "bangumi"
+        basis.log("Successfully got anime info: "+"("+name+")"+" from bangumi", "INFO")
     except Exception as e:
         mikanWeb = requests.get(episodeData.mikanlink)
         mikanWebSoup = BeautifulSoup(mikanWeb.text, 'html.parser')
@@ -100,7 +101,7 @@ def get_anime_info(episodeData:dao.episode):
             month = 1
         month = math.floor(month/3)*3+1
         source = "mikan"
-        basis.log("Error getting anime info: "+"("+name+")"+str(e))
+        basis.log("Error getting anime info: "+"("+name+")"+" from bangumi, successfully got anime info from mikan", "WARNING")
     path = "/"+str(year)+"/"+str(month)+"/"+str(name)
     animeInfo = dao.anime(name, season, year, month, episodeData.bangumiid, bangumiLink,0,path,"datetime('now')",source)
 

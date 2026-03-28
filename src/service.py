@@ -5,7 +5,7 @@ import downloader
 import basis
 import dao
 
-def get_more_episodes(mikanLink,path):
+def get_more_episodes(ep:dao.episode,path ,client):
     '''
     get_more_episodes的 Docstring
     
@@ -18,13 +18,14 @@ def get_more_episodes(mikanLink,path):
     :param path: 下载路径
 
     '''
-    rssLink=crawler.get_more_episode_rss(mikanLink)
+    basis.log("Getting more episodes for: "+ep.title, "INFO")
+    rssLink=crawler.get_more_episode_rss(ep.mikanlink)
     moreEP=dao.episode("","",0,"",0,"",0,0,0)
     moreEpList = rss.get_rss_toList(rssLink,moreEP)
     for item in moreEpList:
-        if item.torrentlink != mikanLink:
-            basis.log("Found additional episode: "+item.title)
+        if item.torrentlink != ep.mikanlink:
+            basis.log("Found additional episode: "+item.title , "INFO")
             item = crawler.upd_episode_info(item,0)
             database.add_episode(item)
-            downloader.download(item.torrentlink, path)
+            downloader.download(item, path, client)
     return None

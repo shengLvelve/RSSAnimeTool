@@ -1,6 +1,7 @@
 import fastfeedparser
 import dao
 import basis
+import time
 
 def get_rss_toList(RSS_url:str,lastEP:dao.episode):
     
@@ -16,7 +17,19 @@ def get_rss_toList(RSS_url:str,lastEP:dao.episode):
             当遇到与lastEP相同的剧集时停止收集并返回当前列表
     """
     templist= []
-    RSS = fastfeedparser.parse(RSS_url)
+    try:
+        RSS = fastfeedparser.parse(RSS_url)
+    except Exception as e:
+        basis.log("Failed to fetch RSS feed: "+str(e), "ERROR")
+        while RSS.entries is None:
+            basis.log("Retrying to fetch RSS feed...", "WARNING")
+            
+            RSS = fastfeedparser.parse(RSS_url)
+            basis.log("Failed to fetch RSS feed: "+str(e), "ERROR")
+            time.sleep(10)  # 等待10秒后重试
+
+        
+    
     for entry in RSS.entries:
         if lastEP.torrentlink != entry.enclosures[0]['url']:
             ep = dao.episode(entry.title, "", basis.getEpisode(entry.title), entry.link, entry.enclosures[0]['url'], "", "datetime('now')", 1, 0)

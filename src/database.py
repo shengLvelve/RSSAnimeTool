@@ -61,6 +61,12 @@ def initDB():
              DOWNLOAD INTEGER DEFAULT 0
              );
              ''')
+    conn.execute('''
+             CREATE TABLE IF NOT EXISTS CONFIG (
+             KEY TEXT,
+             VALUE TEXT
+             );
+             ''')
     conn.close()
 
 def upd_download_status(status,torrentLink):
@@ -170,4 +176,44 @@ def add_anime(anime:dao.anime):
                                 (anime.name, anime.season, anime.year, anime.month, anime.bangumiid, anime.bangumilink, anime.path, anime.source))
     conn.commit()
     conn.close()
-    basis.log("Inserted new anime: "+anime.name)
+    basis.log("Inserted new anime: "+anime.name , "INFO")
+
+def add_config(key:str,value:str):
+    """
+    将配置项插入到数据库的CONFIG表中
+    
+    Args:
+        key (str): 配置项的键
+        value (str): 配置项的值
+    
+    Raises:
+        sqlite3.Error: 当数据库操作失败时抛出
+    """
+    conn = sqlite3.connect(db)
+    if conn.execute('SELECT * FROM CONFIG WHERE KEY = ?;', (key,)).fetchone() is None:
+        conn.execute('''INSERT INTO CONFIG (KEY, VALUE) VALUES (?, ?)''', (key, value,))
+    else:
+        conn.execute('''UPDATE CONFIG SET VALUE = ? WHERE KEY = ?''', (value, key,))
+    conn.commit()
+    conn.close()
+
+def get_config(key:str):
+    """
+    从数据库的CONFIG表中获取指定键的配置值
+    
+    Args:
+        key (str): 要查询的配置项键
+    
+    Returns:
+        str: 配置项的值，如果未找到则返回None
+    
+    Raises:
+        sqlite3.Error: 当数据库操作失败时抛出
+    """
+    conn = sqlite3.connect(db)
+    result = conn.execute('SELECT VALUE FROM CONFIG WHERE KEY = ?;', (key,)).fetchone()
+    conn.close()
+    if result is not None:
+        return result[0]
+    else:
+        return None
