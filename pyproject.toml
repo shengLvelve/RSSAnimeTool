@@ -1,0 +1,21 @@
+[project]
+name = "rssanimetool"
+version = "0.1.0"
+description = "download anime from RSS"
+authors = [
+    {name = "shengLvelve",email = "liubowenlbwabcd@gmail.com"}
+]
+license = "GPL-3.0"
+requires-python = ">=3.10"
+dependencies = [
+    "configparser (==7.2.0)",
+    "termcolor (==3.3.0)",
+    "beautifulsoup4 (==4.14.3)",
+    "qbittorrent-api (==2025.11.1)",
+    "fastfeedparser (==0.5.9)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
