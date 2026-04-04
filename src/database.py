@@ -31,6 +31,12 @@ def initDB():
         TIME: 时间戳
         ISREALTIME: 是否实时更新
         DOWNLOAD: 下载状态(0-未下载)
+
+    CONFIG表结构:
+        KEY: 配置项键
+        VALUE: 配置项值
+        
+        
     """
     conn = sqlite3.connect(db)
     conn.execute('''

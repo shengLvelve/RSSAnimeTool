@@ -76,10 +76,11 @@ def get_anime_info(episodeData:dao.episode):
         bangumiWeb = requests.get(bangumiLink, cookies=cookies, headers=headers)
         bangumiWeb.encoding = 'utf-8'
         bangumiWebSoup = BeautifulSoup(bangumiWeb.text, 'html.parser')
-        name = bangumiWebSoup.find_all('li')[39].text.split(': ')[-1]
+        name = bangumiWebSoup.find('span', string='中文名: ').next_sibling
         season = ""
-        date= bangumiWebSoup.find_all('li')[41].text
-        date = date.split(': ')[1]
+        # date= bangumiWebSoup.find_all('li')[41].text
+        date = bangumiWebSoup.find('span', string='放送开始: ').next_sibling
+        # date = date.split(': ')[1]
         year = date.split('年')[0]
         month = int(date.split('年')[1].split('月')[0])
         if month == 12:
