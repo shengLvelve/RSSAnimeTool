@@ -217,3 +217,21 @@ def get_config(key:str):
         return result[0]
     else:
         return None
+
+def check_episode_exists(TORRENTLINK:str):
+    """
+    检查数据库中是否存在指定torrent链接的剧集记录
+    
+    Args:
+        url (str): 要检查的torrent链接
+    
+    Returns:
+        bool: 如果存在对应的剧集记录则返回True，否则返回False
+    
+    Raises:
+        sqlite3.Error: 当数据库操作失败时抛出
+    """
+    conn = sqlite3.connect(db)
+    result = conn.execute('SELECT 1 FROM EPISODE WHERE TORRENTLINK = ?;', (TORRENTLINK,)).fetchone()
+    conn.close()
+    return result is not None

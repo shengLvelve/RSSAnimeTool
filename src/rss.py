@@ -2,6 +2,7 @@ import fastfeedparser
 import dao
 import basis
 import time
+import database
 
 def get_rss_toList(RSS_url:str,lastEP:dao.episode):
     
@@ -31,9 +32,14 @@ def get_rss_toList(RSS_url:str,lastEP:dao.episode):
         
     
     for entry in RSS.entries:
-        if lastEP.torrentlink != entry.enclosures[0]['url']:
+        # if lastEP.torrentlink != entry.enclosures[0]['url']:
+        if not database.check_episode_exists(entry.enclosures[0]['url']):
             ep = dao.episode(entry.title, "", basis.getEpisode(entry.title), entry.link, entry.enclosures[0]['url'], "", "datetime('now')", 1, 0)
             templist.append(ep)
+        """
         else:
-            return templist
+            return templist        
+        """
+
+
     return templist

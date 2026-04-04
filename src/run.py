@@ -41,6 +41,8 @@ while downloaderStatus != 1:
     downloaderStatus = downloader.downloader_check()
 rssurl = basis.get_config_value('RSS', 'url')    
 
+RSS_scan_mode = basis.get_config_value('conf', 'RSS_scan_mode')
+
 while 1:
     try:
         basis.log("Checking for new episodes...", "INFO")
@@ -74,6 +76,8 @@ while 1:
         basis.log("connection error: "+str(e), "ERROR")
         time.sleep(int(basis.get_config_value('conf', 'sleep_time')))
         continue
+    if RSS_scan_mode == "once":
+        break
 
 
 

@@ -86,6 +86,8 @@ def initConfig():
         config = configparser.ConfigParser(interpolation=None)
         
         config['conf'] = {
+            'RSS_scan_mode_help': '⬇RSS_scan_mode RSS扫描模式，扫描一次RSS链接完成下载(once)和长时间循环进行(always)',
+            'RSS_scan_mode': 'always',
             'get_more_episode_help': '⬇get_more_episode 补全提供下载的所有剧集',
             'get_more_episode': True,
             'sleep_time_help': '⬇sleep_time 检查间隔时间，单位秒',

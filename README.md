@@ -24,29 +24,24 @@
 
 
 ## 安装
-- 依赖
 
-    ```python
-    pip install -e . 
-    ```
-    - configparser-7.2.0
-    - termcolor-3.3.0
-    - BeautifulSoup4-4.14.3
-    - qbittorrent-api-2025.11.1
-    - fastfeedparser-0.5.9
-    
-- 环境
+下载release对应平台的RSSAnimeTool.exe文件，双击运行即开始使用。
 
-    Python 3.10+
+- qbittorrent设置（桌面环境）
+
+    1. 打开qbittorrent，进入设置界面。
+    2. 在“Web UI”选项卡中，启用“Web用户界面（远程控制）”选项。
+    3. 设置用户名和密码（默认为admin/adminadmin，强烈建议不要使用默认密码）。
+    4. 确保qbittorrent的Web UI端口未被其他应用占用。
+    5. 保存设置并重启qbittorrent。
 
 ## 使用
-- 示例
 
-    运行RSSAnimeTool.exe，若不存在config.ini则自动生成一个默认的配置文件config.ini，编辑config.ini以定制化工具的行为，然后再次运行RSSAnimeTool.exe即自动开始拉取RSS信息推送至下载器。
+在mikanani.me上订阅你感兴趣的动漫的RSS源，每个动漫避免订阅多个字幕组，以免重复下载剧集。
 
-- 配置文件说明
+运行RSSAnimeTool.exe，若不存在config.ini则自动生成一个默认的配置文件config.ini，编辑config.ini以定制化工具的行为，然后再次运行RSSAnimeTool.exe即自动开始拉取RSS信息推送至下载器。
 
-    第一次运行RSSAnimeTool.exe，若不存在config.ini，会自动生成一个默认的配置文件config.ini，根据需要修改其中的参数来定制化工具的行为。 
+
 
 <!-- - 日志位置（暂未实现）
 
@@ -54,7 +49,12 @@
 
 
 ## 配置
+- 配置文件说明
+
+    第一次运行RSSAnimeTool.exe，若不存在config.ini，会自动生成一个默认的配置文件config.ini，根据需要修改其中的参数来定制化工具的行为。 
+
 - config.ini（初次执行后自动生成）
+
 - 配置文件主要参数包括：
 
   - | conf | 控制工具的行为和运行状态的参数。|
@@ -65,6 +65,7 @@
     | conf | get_more_episode | 是否补全提供下载的所有剧集，默认为True。 | 0.1.0 | - |
     | conf | sleep_time | 在请求RSS源之间休眠的时间（秒）。 | 0.1.0 | - |
     | conf | net_error_sleep | 在发生网络错误时的休眠时间（秒）。 | 0.1.0 | - |
+    | conf | RSS_scan_mode | RSS扫描模式，默认为loop，表示持续扫描RSS源；设置为once表示单次扫描后结束程序。 | 0.1.1 | - |
 
   - | RSS | 控制RSS订阅源相关的参数。 |
     | --- | --- |
@@ -92,6 +93,22 @@
     | qbittorrent | password | qbittorrent的密码，默认为adminadmin。    | 0.1.0 | - |
     | qbittorrent | download_tag | 下载文件的标签，默认为RSSAnimeTool。 | 0.1.0 | - |
 
+## 拉取源码执行
+
+- 依赖
+
+    ```python
+    pip install -e . 
+    ```
+    - configparser-7.2.0
+    - termcolor-3.3.0
+    - BeautifulSoup4-4.14.3
+    - qbittorrent-api-2025.11.1
+    - fastfeedparser-0.5.9
+    
+- 环境
+
+    Python 3.10+
 
 
 ## 已知问题&未来计划
@@ -122,11 +139,16 @@
 
     更新问题，若对数据库字段、config.ini参数等进行修改，要确定方案如何进行更新操作。
 
+    - 0.1.0-6(v0.1.1已解决)
+
+    季度更替时，某些新季度的剧集在订阅后在RSS中可能排在已下载剧集之后，导致无法第一时间下载，第二周更新后通过补齐功能下载前一集。
+
 - 未来计划
     - 增加更多下载工具的支持。
     - 优化日志记录功能，提供更详细的运行状态和错误信息。
     - 优化RSS采集功能（抓取订阅的剧集、字幕组的订阅RSS源进行操作，而非通过订阅RSS源），提升工具的稳定性和效率。
     - 优化使用流程，提供更友好的用户界面和操作体验。
+    - 增加单次执行模式，单次执行后结束程序。(已实现，见config.ini中的RSS_scan_mode参数)
  
 <!-- ## 示例
 - 典型流程
