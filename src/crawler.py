@@ -5,7 +5,7 @@ import math
 import basis
 import dao
 
-def upd_episode_info(episodeData:dao.episode,isrealtime):
+def upd_episode_info(episodeData:dao.episode):
     '''
     upd_episode_info 的 Docstring
     补充episode对象的bangumiID和subTitle。数据源：mikan
@@ -29,7 +29,7 @@ def upd_episode_info(episodeData:dao.episode,isrealtime):
     bangumiID = bangumiLink.split('/')[-1]
     episodeData.bangumiid = bangumiID
     episodeData.subtitle = subTitle
-    episodeData.isrealtime = isrealtime
+    
 
     return episodeData
 
@@ -72,6 +72,19 @@ def get_anime_info(episodeData:dao.episode):
     # 'Cookie': 'chii_sec_id=rP%2BhRi24bHu%2BR4MqmKIkNCxcEc2G1RogciY4o9PB; chii_cookietime=2592000; chii_theme=dark; _ga=GA1.1.1345578203.1766238797; _ga_1109JLGMHN=GS2.1.s1766238797$o1$g1$t1766238820$j37$l0$h0; _tea_utm_cache_10000007=undefined; chii_sid=r3fe3w',
     }
     try:
+        '''
+        从mikan获取动画&字幕组rss信息
+        '''
+        # mikanLink = episodeData.mikanlink
+        # mikanWeb = requests.get(mikanLink)
+        # mikanWeb.encoding = 'utf-8'
+        # mikanWebSoup = BeautifulSoup(mikanWeb.text, 'html.parser')
+        # rssLink = "https://mikanani.me/"+mikanWebSoup.find_all('a', class_='mikan-rss')[0]['href']
+        rssLink = get_more_episode_rss(episodeData.mikanlink)
+
+        '''
+        先尝试从bangumi获取番剧信息，失败则从mikan获取
+        '''
         bangumiLink = "https://bgm.tv/subject/"+episodeData.bangumiid
         bangumiWeb = requests.get(bangumiLink, cookies=cookies, headers=headers)
         bangumiWeb.encoding = 'utf-8'
@@ -104,13 +117,13 @@ def get_anime_info(episodeData:dao.episode):
         source = "mikan"
         basis.log("Error getting anime info: "+"("+name+")"+" from bangumi, successfully got anime info from mikan", "WARNING")
     path = "/"+str(year)+"/"+str(month)+"/"+str(name)
-    animeInfo = dao.anime(name, season, year, month, episodeData.bangumiid, bangumiLink,0,path,"datetime('now')",source)
+    animeInfo = dao.anime(name, season, year, month, episodeData.bangumiid, bangumiLink,0,path,"datetime('now')",source,rssLink)
 
     return animeInfo
 
 def get_more_episode_rss(mikanLink:str):
     '''
-
+    v0.2.0新增方法
     get_more_episode_rss 的 Docstring
     
     从mikan获取该番剧字幕组rss链接

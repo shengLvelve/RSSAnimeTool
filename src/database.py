@@ -1,7 +1,10 @@
 import sqlite3
 import dao
 import basis
+import RSSAnimeTool.src.version as version
 
+
+version = version.db_version
 db = 'RSSAnime.db'
 def initDB():
 
@@ -19,6 +22,7 @@ def initDB():
         PATH: 文件路径
         TIME: 时间戳
         SOURCE: 数据来源
+        RSSLINK: 动画订阅字幕组的RSS链接（v0.2.0 引入）
     
     EPISODE表结构:
         ID: 自增主键
@@ -50,7 +54,8 @@ def initDB():
              FIN INTEGER,
              PATH TEXT,
              TIME DATETIME,
-             SOURCE TEXT
+             SOURCE TEXT,
+             RSSLINK TEXT
              );
              ''')
     conn.execute('''
@@ -73,6 +78,11 @@ def initDB():
              VALUE TEXT
              );
              ''')
+    
+    if conn.execute('SELECT * FROM CONFIG WHERE KEY = ?;', ('version',)).fetchone() is None:
+        conn.execute('''INSERT INTO CONFIG (KEY, VALUE) VALUES (?, ?)''', ('version', version,))
+
+    conn.commit()
     conn.close()
 
 def upd_download_status(status,torrentLink):
@@ -130,8 +140,8 @@ def add_episode(episode:dao.episode):
     """
 
     conn = sqlite3.connect(db)
-    conn.execute('''INSERT INTO EPISODE (TITLE, BANGUMIID, EPISODE, MIKANLINK, TORRENTLINK, SUBTITLE, TIME, ISREALTIME)
-                        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?)''', (episode.title, episode.bangumiid, episode.episode, episode.mikanlink, episode.torrentlink, episode.subtitle, episode.isrealtime,))
+    conn.execute('''INSERT INTO EPISODE (TITLE, BANGUMIID, EPISODE, MIKANLINK, TORRENTLINK, SUBTITLE, TIME, ISREALTIME, DOWNLOAD)
+                        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)''', (episode.title, episode.bangumiid, episode.episode, episode.mikanlink, episode.torrentlink, episode.subtitle, episode.isrealtime, episode.download,))
     
     conn.commit()
     conn.close()
@@ -154,10 +164,11 @@ def get_anime(bangumiid:str):
     animeExist = conn.execute('SELECT * FROM ANIME WHERE BANGUMIID = ?;', (bangumiid,)).fetchone()
     conn.close()
     if animeExist is None:
-         anime = dao.anime("","","","","","","","","","")
+         anime = dao.anime("","","","","","","","","","","")
     else:
-        anime = dao.anime(animeExist[0], animeExist[1], animeExist[2], animeExist[3], animeExist[4], animeExist[5], animeExist[6], animeExist[7], animeExist[8], animeExist[9])
+        anime = dao.anime(animeExist[0], animeExist[1], animeExist[2], animeExist[3], animeExist[4], animeExist[5], animeExist[6], animeExist[7], animeExist[8], animeExist[9], animeExist[10])
     return anime
+
 def add_anime(anime:dao.anime):
     """
     将动漫信息插入到数据库表中
@@ -177,12 +188,24 @@ def add_anime(anime:dao.anime):
         sqlite3.Error: 当数据库操作失败时抛出
     """
     conn = sqlite3.connect(db)
-    conn.execute('''INSERT INTO ANIME (NAME, SEASON, YEAR, MONTH, BANGUMIID, BANGUMILINK, PATH, TIME , SOURCE)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)''', 
-                                (anime.name, anime.season, anime.year, anime.month, anime.bangumiid, anime.bangumilink, anime.path, anime.source))
+    
+    if anime.time == "datetime('now')":
+        conn.execute('''INSERT INTO ANIME (NAME, SEASON, YEAR, MONTH, BANGUMIID, BANGUMILINK, PATH, TIME , SOURCE , RSSLINK)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)''', 
+                        (anime.name, anime.season, anime.year, anime.month, anime.bangumiid, anime.bangumilink, anime.path ,  anime.source, anime.rsslink,))
+        basis.log("Inserted new anime: "+anime.name , "INFO")
+    else:
+
+        conn.execute('''INSERT INTO ANIME (NAME, SEASON, YEAR, MONTH, BANGUMIID, BANGUMILINK, PATH, TIME , SOURCE , RSSLINK)
+
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
+
+                        (anime.name, anime.season, anime.year, anime.month, anime.bangumiid, anime.bangumilink, anime.path , anime.time, anime.source, anime.rsslink,))
+        
+
+
     conn.commit()
     conn.close()
-    basis.log("Inserted new anime: "+anime.name , "INFO")
 
 def add_config(key:str,value:str):
     """
@@ -241,3 +264,111 @@ def check_episode_exists(TORRENTLINK:str):
     result = conn.execute('SELECT 1 FROM EPISODE WHERE TORRENTLINK = ?;', (TORRENTLINK,)).fetchone()
     conn.close()
     return result is not None
+
+def get_anime_by_month(year:str, month:str):
+    '''
+    v0.2.0新增方法
+    get_anime_by_month 的 Docstring
+    
+    根据月份获取数据库中对应季度的番剧列表
+
+    :param month: 月份
+
+    :return: 番剧列表
+    '''
+    conn = sqlite3.connect(db)
+    result = conn.execute('SELECT * FROM ANIME WHERE MONTH = ? AND YEAR = ?;', (month, year)).fetchall()
+    conn.close()
+    animeList = []
+    for anime in result:
+        animeList.append(dao.anime(anime[0], anime[1], anime[2], anime[3], anime[4], anime[5], anime[6], anime[7], anime[8], anime[9], anime[10]))
+    return animeList
+
+def get_column_names(table_name:str,db:str):
+    
+    '''
+    v0.2.0新增方法
+    get_column_names 的 Docstring
+    
+    获取数据库表的列名列表
+
+    :param table_name: 数据库表名称
+
+    :return: 列名列表
+    '''
+    conn = sqlite3.connect(db)
+    result = conn.execute(f'PRAGMA table_info({table_name});').fetchall()
+    conn.close()
+    column_names = [column[1] for column in result]
+    return column_names
+
+def get_all_anime(db:str):
+    '''
+    v0.2.0新增方法
+    get_all_anime 的 Docstring
+    
+    获取数据库中所有的番剧信息
+    用于更新数据库时获取现有数据
+
+    :return: 番剧对象数组
+    '''
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    result = conn.execute('SELECT * FROM ANIME;').fetchall()
+    conn.close()
+    animeList = []
+    for anime in result:
+        animeObj = dao.anime()
+        animeObj.toObject(anime)
+        animeList.append(animeObj)
+    return animeList
+
+def get_episode(bangumiid:str,db:str):
+    '''
+    v0.2.0新增方法
+    get_episode 的 Docstring
+    
+    获取数据库中指定番剧的最新剧集信息
+    '''
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    result = conn.execute('SELECT * FROM EPISODE WHERE BANGUMIID = ? ;', (bangumiid,)).fetchall()
+    conn.close()
+    return result
+
+def get_all_episode(db:str):
+
+    '''
+
+    v0.2.0新增方法
+    get_all_episode 的 Docstring
+
+    获取数据库中所有的剧集信息
+    用于更新数据库时获取现有数据
+    '''
+
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    result = conn.execute('SELECT * FROM EPISODE;').fetchall()
+    conn.close()
+    episodeList = []
+    for episode in result:
+        episodeObj = dao.episode()
+        episodeObj.toObject(episode)
+        episodeList.append(episodeObj)
+    return episodeList
+
+def get_all_config(db:str):
+    '''
+    v0.2.0新增方法
+    get_all_config 的 Docstring
+    
+    获取数据库中所有的配置信息
+    用于更新数据库时获取现有数据
+    '''
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    result = conn.execute('SELECT * FROM CONFIG;').fetchall()
+    conn.close()
+    
+    return result
