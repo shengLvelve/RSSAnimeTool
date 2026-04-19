@@ -1,7 +1,7 @@
 import sqlite3
 import dao
 import basis
-import RSSAnimeTool.src.version as version
+import version as version
 
 
 version = version.db_version

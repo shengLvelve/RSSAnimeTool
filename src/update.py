@@ -18,7 +18,10 @@ if config_version is None:
     config_version = '0.1.0'
 config_version_tuple = tuple(map(int, config_version.split('.')))
 
-db_version = database.get_config('version')
+try:
+    db_version = database.get_config('version')
+except:
+        db_version = None
 if db_version is None:
     db_version = '0.1.0'
 db_version_tuple = tuple(map(int, db_version.split('.')))

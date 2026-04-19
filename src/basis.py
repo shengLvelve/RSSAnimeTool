@@ -7,7 +7,7 @@ from termcolor import colored
 import math
 import dao
 import logging
-import RSSAnimeTool.src.version as version
+import version as version
 
 def initLogger():
     '''
@@ -29,6 +29,8 @@ def initLogger():
     try:
         console_display = get_config_value('conf', 'console_display')
     except Exception :
+        console_display = True
+    if console_display == None:
         console_display = True
     if console_display:
         console_handler = logging.StreamHandler()
@@ -130,12 +132,12 @@ def createConfig():
             'get_more_episode_help': '⬇get_more_episode 补全提供下载的所有剧集',
             'get_more_episode': True,
             'sleep_time_help': '⬇sleep_time 检查间隔时间，单位秒',
-            'sleep_time': 10,
-            'net_error_sleep' : 10,
+            'sleep_time': 3600,
+            'net_error_sleep' : 600,
             # ⬇v0.2.0新增
-            'dev_mode' : True,
+            'dev_mode' : False,
             # ⬇v0.2.0新增
-            'console_display' : True,
+            'console_display' : False,
             # ⬇v0.2.0新增
             'version_help' : version.config_version
             }
@@ -145,7 +147,7 @@ def createConfig():
             }
     config['download'] = {
             'download_path_help': '⬇下载路径',
-            'download_path': '/media/onedrive/RSSAnimeTool',
+            'download_path': '/your/download/path',
             'download_tool_help': '⬇下载工具，当前支持qbittorrent',
             'download_tool': 'qbittorrent',
             'download_retry_time': 5,
