@@ -99,11 +99,11 @@
 
     | 参数类别 | 参数名称 | 描述 | 加入版本 | 弃用版本 |
     | --- | --- | --- | --- | --- |
-    | transmission | host | transmission的地址，eg、http://localhost。 | 0.1.0 | - |
-    | transmission | port | transmission的端口，默认为9091。 | 0.1.0 | - |
-    | transmission | username | transmission的用户名，默认为admin。 | 0.1.0 | - |
-    | transmission | password | transmission的密码，默认为password。    | 0.1.0 | - |
-    | transmission | label | 下载文件的标签组，使用‘,’分隔，默认为RSSAnimeTool。 | 0.1.0 | - |
+    | transmission | host | transmission的地址，eg、http://localhost。 | 0.2.1 | - |
+    | transmission | port | transmission的端口，默认为9091。 | 0.2.1 | - |
+    | transmission | username | transmission的用户名，默认为admin。 | 0.2.1 | - |
+    | transmission | password | transmission的密码，默认为password。    | 0.2.1 | - |
+    | transmission | label | 下载文件的标签组，使用‘,’分隔，默认为RSSAnimeTool。 | 0.2.1 | - |
 
 ## 拉取源码
 
