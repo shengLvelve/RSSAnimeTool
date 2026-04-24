@@ -8,6 +8,7 @@ import math
 import dao
 import logging
 import version as version
+import anitopy
 
 def initLogger():
     '''
@@ -77,25 +78,38 @@ def getEpisode(title):
 
     :future: 支持更多字幕组,字幕组(subTitle)改为使用mikan提供的数据，方法中拿出数据库信息
     '''
-    subTitle = re.findall("^\[([^\[\]]+)\]", title)[0]
     episode = 0
+    '''
+    V0.2.1弃用，转为使用anitopy
+    '''
+    # subTitle = re.findall("^\[([^\[\]]+)\]", title)[0]
+    # try:
+    #  match subTitle:
+    #     case 'ANi'|'LoliHouse'|'澄空学园&动漫国字幕组&LoliHouse'|'喵萌奶茶屋&LoliHouse':
+    #         '''
+    #         [ANi] 青梅竹马的恋爱喜剧无法成立 - 02 [1080P][Baha][WEB-DL][AAC AVC][CHT][MP4]
+    #         [LoliHouse] 29岁单身中坚冒险家的日常 / 29-sai Dokushin Chuuken Boukensha no Nichijou - 01 [WebRip 1080p HEVC-10bit AAC][简繁内封字幕]
+    #         '''
+    #         episode = re.findall("-\s*(\d+(?:\.\d+)?)\s*\[", title)[0]
+    #     case '绿茶字幕组'|'桜都字幕组':
+    #         '''
+    #         [桜都字幕组] 有栖川炼其实是个女生吧。 / Arisugawa Ren tte Honto wa Onna Nanda yo ne. [01][1080p][繁体内嵌]
+    #         [绿茶字幕组] 能帮我弄干净吗？/Kirei ni Shite Moraemasu ka [01][WebRip][1080p][简繁日内封]
+    #         '''
+    #         episode = re.findall("\[([\w.-]+)\](?=.*?\[)", title)[1:-1][0]
+    # except Exception as e:
+    #     episode = "other"
+    #     basis.log(f"Error occurred while extracting episode number from title: {title}", "warning")
+    info = anitopy.parse(title)
     try:
-     match subTitle:
-        case 'ANi'|'LoliHouse'|'澄空学园&动漫国字幕组&LoliHouse'|'喵萌奶茶屋&LoliHouse':
-            '''
-            [ANi] 青梅竹马的恋爱喜剧无法成立 - 02 [1080P][Baha][WEB-DL][AAC AVC][CHT][MP4]
-            [LoliHouse] 29岁单身中坚冒险家的日常 / 29-sai Dokushin Chuuken Boukensha no Nichijou - 01 [WebRip 1080p HEVC-10bit AAC][简繁内封字幕]
-            '''
-            episode = re.findall("-\s*(\d+(?:\.\d+)?)\s*\[", title)[0]
-        case '绿茶字幕组'|'桜都字幕组':
-            '''
-            [桜都字幕组] 有栖川炼其实是个女生吧。 / Arisugawa Ren tte Honto wa Onna Nanda yo ne. [01][1080p][繁体内嵌]
-            [绿茶字幕组] 能帮我弄干净吗？/Kirei ni Shite Moraemasu ka [01][WebRip][1080p][简繁日内封]
-            '''
-            episode = re.findall("\[([\w.-]+)\](?=.*?\[)", title)[1:-1][0]
+        episode = info.get('episode_number')
     except Exception as e:
+
         episode = "other"
-        basis.log(f"Error occurred while extracting episode number from title: {title}", "ERROR")
+
+        basis.log(f"Error occurred while extracting episode number from title: {title}", "warning")
+   
+   
     return episode
 
 def get_config_value(section, option):

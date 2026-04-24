@@ -12,7 +12,8 @@ dependencies = [
     "termcolor (==3.3.0)",
     "beautifulsoup4 (==4.14.3)",
     "qbittorrent-api (==2025.11.1)",
-    "fastfeedparser (==0.5.9)"
+    "fastfeedparser (==0.5.9)",
+    "anitopy (==2.1.1)"
 ]
 
 

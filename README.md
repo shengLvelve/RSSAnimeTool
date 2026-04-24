@@ -14,18 +14,35 @@
 ## 项目简介
 - 目标
 
-    从mikanani.me提供的RSS订阅源获取动漫更新信息，并将相关下载链接推送至下载器（目前仅支持qbittorrent，后续会增加更多下载工具的支持），按照`/year/season/AnimeName/episode`路径规则进行保存，可直接在jellyfin中媒体库添加season文件夹以便按季度添加至媒体库。工具会定期检查RSS源的更新，并根据配置文件中的参数来决定是否补全提供下载的所有剧集。
+    从mikanani.me提供的RSS订阅源获取动漫更新信息，将下载链接推送至下载器（目前仅支持qbittorrent，后续会增加更多下载工具的支持），按照`/year/season/AnimeName/episode`路径规则进行保存，实现jellyfin可直接读取的文件结构。
 
 <!-- - 主要特性 -->
+- 支持平台
+    1.windows x86
+    2.linux x86_64
+    3.macos x86_64
+    4.macos with Apple silicon（晚些时间）
 
+<!-- ## 功能 -->
 
-## 功能
+## 使用
 
+- 初次使用
 
+在mikanani.me(或和mikanani.me的rss同结构的其他站点)上订阅你感兴趣的动漫的RSS源(每个动漫避免订阅多个字幕组，以免重复下载剧集)。
 
-## 安装
+下载release对应平台的RSSAnimeTool文件，初次运行RSSAnimeTool文件生成config.ini(配置文件)和RSSAnime.db(数据库文件)。
 
-下载release对应平台的RSSAnimeTool.exe文件，双击运行即开始使用。
+修改生成的config.ini文件，将mikanani.me的RSS源地址、qbittorrent的地址、用户名、密码等填入config.ini的对应参数中。
+
+再次运行RSSAnimeTool，若配置没有问题即拉取RSS信息推送至下载器。
+
+- 更新
+若RSSAnimeTool有更新版本，下载release对应平台的RSSAnimeTool文件，覆盖原RSSAnimeTool文件，再次运行RSSAnimeTool即可。
+若config.ini、RSSAnime.db有更新，将备份更新前版本的对应文件，备份文件为`原文件名.bak.日期时间戳`。
+
+- 日志
+系统日志会保存至`日期log.log`文件中
 
 - qbittorrent设置（桌面环境）
 
@@ -35,23 +52,7 @@
     4. 确保qbittorrent的Web UI端口未被其他应用占用。
     5. 保存设置并重启qbittorrent。
 
-## 使用
-
-在mikanani.me上订阅你感兴趣的动漫的RSS源，每个动漫避免订阅多个字幕组，以免重复下载剧集。
-
-运行RSSAnimeTool.exe，若不存在config.ini则自动生成一个默认的配置文件config.ini，编辑config.ini以定制化工具的行为，然后再次运行RSSAnimeTool.exe即自动开始拉取RSS信息推送至下载器。
-
-
-
-<!-- - 日志位置（暂未实现）
-
-    日志文件位于当前目录下的logs文件夹中，文件名为RSSAnimeTool.log。日志记录了工具的运行状态、错误信息和其他相关信息，方便用户进行调试和问题排查。 -->
-
-
 ## 配置
-- 配置文件说明
-
-    第一次运行RSSAnimeTool.exe，若不存在config.ini，会自动生成一个默认的配置文件config.ini，根据需要修改其中的参数来定制化工具的行为。 
 
 - config.ini（初次执行后自动生成）
 
@@ -93,7 +94,7 @@
     | qbittorrent | password | qbittorrent的密码，默认为adminadmin。    | 0.1.0 | - |
     | qbittorrent | download_tag | 下载文件的标签，默认为RSSAnimeTool。 | 0.1.0 | - |
 
-## 拉取源码执行
+## 拉取源码
 
 - 依赖
 
@@ -105,6 +106,7 @@
     - BeautifulSoup4-4.14.3
     - qbittorrent-api-2025.11.1
     - fastfeedparser-0.5.9
+    - anitopy-2.1.1
     
 - 环境
 
@@ -125,7 +127,14 @@
 
     字幕组若单一剧集提供多个版本的下载链接（如720p和1080p、CHS和CHT），工具会对全部版本进行下载。
 
-    - 0.1.0-4
+- 未来计划
+    - 增加更多下载工具的支持。
+    - 优化使用流程，提供更友好的用户界面和操作体验。
+    - 优化文件名结构解析，支持更多字幕组的文件名结构。
+ 
+ - 已解决问题留档
+
+    - 0.1.0-4(v0.2.1已解决，使用anitopy库解析文件名)
 
     对字幕组提供的文件名结构解析存在局限性，目前仅能正确解析部分字幕组（ANi、LoliHouse、绿茶字幕组、桜都字幕组）提供的文件名结构，导致部分下载链接无法正确识别集数。
 
@@ -135,6 +144,7 @@
     [桜都字幕组] 有栖川炼其实是个女生吧。 / Arisugawa Ren tte Honto wa Onna Nanda yo ne. [01][1080p][繁体内嵌]
     [绿茶字幕组] 能帮我弄干净吗？/Kirei ni Shite Moraemasu ka [01][WebRip][1080p][简繁日内封]
     ```
+
     - 0.1.0-5(v0.2.0已解决)
 
     更新问题，若对数据库字段、config.ini参数等进行修改，要确定方案如何进行更新操作。
@@ -143,14 +153,10 @@
 
     季度更替时，某些新季度的剧集在订阅后在RSS中可能排在已下载剧集之后，导致无法第一时间下载，第二周更新后通过补齐功能下载前一集。
 
-- 未来计划
-    - 增加更多下载工具的支持。
+- 已实现计划留档
     - 优化日志记录功能，保存至文件。（v0.2.0已实现）
-    - 优化RSS采集功能（抓取订阅的剧集、字幕组的订阅RSS源进行操作，而非通过订阅RSS源），提升工具的稳定性和效率。（v0.2.0已实现）
-    - 优化使用流程，提供更友好的用户界面和操作体验。
     - 增加单次执行模式，单次执行后结束程序。(已实现，见config.ini中的RSS_scan_mode参数)
-    - 优化文件名结构解析，支持更多字幕组的文件名结构。
- 
+    - 优化RSS采集功能（抓取订阅的剧集、字幕组的订阅RSS源进行操作，而非通过订阅RSS源），提升工具的稳定性和效率。（v0.2.0已实现）
 <!-- ## 示例
 - 典型流程
 - 输出案例 -->
