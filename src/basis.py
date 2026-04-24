@@ -162,7 +162,7 @@ def createConfig():
     config['download'] = {
             'download_path_help': '⬇下载路径',
             'download_path': '/your/download/path',
-            'download_tool_help': '⬇下载工具，当前支持qbittorrent',
+            'download_tool_help': '⬇下载工具，当前支持qbittorrent、transmission',
             'download_tool': 'qbittorrent',
             'download_retry_time': 5,
             }
@@ -175,6 +175,18 @@ def createConfig():
             'password': 'password',
             'download_tag': 'RSSAnimeTool',
             }
+    config['transmission'] = {
+            'host_help': '⬇transmission 地址。eg:127.0.0.1',
+            'host': 'transmission.com',
+            'port_help': '⬇transmission 端口。eg:9091',
+            'port': '9091',
+            'username_help': '⬇transmission 用户名',
+            'username': 'admin',
+            'password_help': '⬇transmission 密码',
+            'password': 'password',
+            'label_help': '⬇transmission 标签组',
+            'label': 'RSSAnimeTool',
+    }
 
     with open('config.ini', 'w', encoding='utf-8') as configfile:
             config.write(configfile)

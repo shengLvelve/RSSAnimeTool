@@ -1,4 +1,5 @@
-from qbittorrentapi import Client
+from qbittorrentapi import Client as qbClient
+from transmission_rpc import Client as trClient
 import basis
 import database
 import time
@@ -18,7 +19,7 @@ def downloader_check():
         client=downloader_login()
         
     except Exception as e:
-        basis.log("qBittorrent connection error: "+str(e), "ERROR")
+        basis.log(download_tool+" connection error: "+str(e), "ERROR")
         time.sleep(download_retry)
         return 0
     else:
@@ -39,15 +40,34 @@ def downloader_login():
             qb_host = basis.get_config_value('qbittorrent', 'host')
             qb_username = basis.get_config_value('qbittorrent', 'username')
             qb_password = basis.get_config_value('qbittorrent', 'password')
-            client = Client(host=qb_host, username=qb_username, password=qb_password)
+            client = qbClient(host=qb_host, username=qb_username, password=qb_password)
             try:
                 client.auth_log_in()
             except Exception as e:
                 raise ConnectionError("Failed to connect to qBittorrent: "+str(e))
             basis.log("Logged in to "+download_tool, "INFO")
             return client
+        case 'transmission':
+            tr_host = basis.get_config_value('transmission', 'host')
+            tr_port = basis.get_config_value('transmission', 'port')
+            tr_username = basis.get_config_value('transmission', 'username')
+            tr_password = basis.get_config_value('transmission', 'password')
+            
+            try:
 
-def downloader_logout(client:Client):
+                client = trClient(host=tr_host,port=tr_port, username=tr_username, password=tr_password)
+
+            except Exception as e:
+
+                raise ConnectionError("Failed to connect to Transmission: "+str(e))
+
+            basis.log("Logged in to "+download_tool, "INFO")
+
+            return client
+            pass
+
+
+def downloader_logout(client):
     '''
     downloader_logout 的 Docstring
     下载器登出，检查连接
@@ -60,11 +80,13 @@ def downloader_logout(client:Client):
     match download_tool:
         case 'qbittorrent':
             client.auth_log_out()
-    basis.log("Logged out of qBittorrent", "INFO")
+        case 'transmission':
+            pass
+    basis.log("Logged out of "+download_tool, "INFO")
 
 
 
-def download(ep:dao.episode, savePath:str, client:Client):
+def download(ep:dao.episode, savePath:str, client):
     '''
     download 的 Docstring
     根据配置文件，选择下载器
@@ -87,6 +109,9 @@ def download(ep:dao.episode, savePath:str, client:Client):
             qb_tag = basis.get_config_value('qbittorrent', 'download_tag')
             qbittorrent_download(ep, download_path+savePath, client, qb_tag)
             # basis.log("Download started for: "+ep.title, "INFO")
+        case 'transmission':
+            transmission_download(ep, download_path+savePath, client)
+            pass
 
 
 
@@ -115,3 +140,24 @@ def qbittorrent_download(ep:dao.episode, savePath, client, tag):
         basis.log("Added torrent to qBittorrent: "+ep.title, "INFO")
         return 1
     
+def transmission_download(ep:dao.episode, savePath, client:trClient):
+    '''
+    transmission_download 的 Docstring
+    连接transmission下载器，新建任务
+    '''
+    label = basis.get_config_value('transmission', 'label')
+    labels = label.split(',')
+    try:
+        client.add_torrent(torrent=ep.torrentlink, download_dir=savePath,labels=labels)
+    except Exception as e:
+
+        basis.log("Error adding torrent to Transmission: "+str(e), "ERROR")
+
+        return None
+    else:
+        # 更新数据库下载状态
+        database.upd_download_status("1",ep.torrentlink)
+        basis.log("Added torrent to Transmission: "+ep.title, "INFO")
+        return 1
+    
+    return 1

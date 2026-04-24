@@ -14,7 +14,7 @@
 ## 项目简介
 - 目标
 
-    从mikanani.me提供的RSS订阅源获取动漫更新信息，将下载链接推送至下载器（目前仅支持qbittorrent，后续会增加更多下载工具的支持），按照`/year/season/AnimeName/episode`路径规则进行保存，实现jellyfin可直接读取的文件结构。
+    从mikanani.me提供的RSS订阅源获取动漫更新信息，将下载链接推送至下载器（目前支持qbittorrent、transmission，后续会增加更多下载工具的支持），按照`/year/season/AnimeName/episode`路径规则进行保存，实现jellyfin可直接读取的文件结构。
 
 <!-- - 主要特性 -->
 - 支持平台
@@ -33,7 +33,7 @@
 
 下载release对应平台的RSSAnimeTool文件，初次运行RSSAnimeTool文件生成config.ini(配置文件)和RSSAnime.db(数据库文件)。
 
-修改生成的config.ini文件，将mikanani.me的RSS源地址、qbittorrent的地址、用户名、密码等填入config.ini的对应参数中。
+修改生成的config.ini文件，将mikanani.me的RSS源地址、下载器的地址、用户名、密码等填入config.ini的对应参数中。
 
 再次运行RSSAnimeTool，若配置没有问题即拉取RSS信息推送至下载器。
 
@@ -89,10 +89,21 @@
 
     | 参数类别 | 参数名称 | 描述 | 加入版本 | 弃用版本 |
     | --- | --- | --- | --- | --- |
-    | qbittorrent | host | qbittorrent的地址，默认为http://localhost:9090。 | 0.1.0 | - |
+    | qbittorrent | host | qbittorrent的地址，eg、http://localhost:9090。 | 0.1.0 | - |
     | qbittorrent | username | qbittorrent的用户名，默认为admin。 | 0.1.0 | - |
     | qbittorrent | password | qbittorrent的密码，默认为adminadmin。    | 0.1.0 | - |
     | qbittorrent | download_tag | 下载文件的标签，默认为RSSAnimeTool。 | 0.1.0 | - |
+
+  - | transmission | 控制transmission相关的参数。 |
+    | --- | --- |
+
+    | 参数类别 | 参数名称 | 描述 | 加入版本 | 弃用版本 |
+    | --- | --- | --- | --- | --- |
+    | transmission | host | transmission的地址，eg、http://localhost。 | 0.1.0 | - |
+    | transmission | port | transmission的端口，默认为9091。 | 0.1.0 | - |
+    | transmission | username | transmission的用户名，默认为admin。 | 0.1.0 | - |
+    | transmission | password | transmission的密码，默认为password。    | 0.1.0 | - |
+    | transmission | label | 下载文件的标签组，使用‘,’分隔，默认为RSSAnimeTool。 | 0.1.0 | - |
 
 ## 拉取源码
 
@@ -107,6 +118,7 @@
     - qbittorrent-api-2025.11.1
     - fastfeedparser-0.5.9
     - anitopy-2.1.1
+    - transmission-rpc-7.0.11
     
 - 环境
 
