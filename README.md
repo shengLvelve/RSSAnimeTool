@@ -18,10 +18,10 @@
 
 <!-- - 主要特性 -->
 - 支持平台
-    1.windows x86
-    2.linux x86_64
-    3.macos x86_64
-    4.macos with Apple silicon（晚些时间）
+    1. windows x86
+    2. linux x86_64
+    3. macos x86_64
+    4. macos with Apple silicon（晚些时间）
 
 <!-- ## 功能 -->
 
