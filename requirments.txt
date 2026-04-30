@@ -1,0 +1,7 @@
+configparser-7.2.0
+termcolor-3.3.0
+BeautifulSoup4-4.14.3
+qbittorrent-api-2025.11.1
+fastfeedparser-0.5.9
+anitopy-2.1.1
+transmission-rpc-7.0.11
