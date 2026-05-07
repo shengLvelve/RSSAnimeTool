@@ -93,12 +93,10 @@ def update_db():
 def update_data():
     # 数据更新逻辑
     # 
-    if  check_tables('ANIME') & check_tables('EPISODE') & check_tables('CONFIG'):
-        pass
-    else:
-        update_anime_table()
-        update_episode_table()
-        update_config_table()
+    
+    update_anime_table()
+    update_episode_table()
+    update_config_table()
     os.rename('RSSAnime.db.bak', 'RSSAnime.db.bak.'+datetime.date.today().strftime("%Y%m%d")+str(time.time() * 1000))
 
             

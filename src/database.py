@@ -334,6 +334,7 @@ def get_all_anime(db:str):
         animeObj = dao.anime()
         animeObj.toObject(anime)
         animeList.append(animeObj)
+        # print(animeObj.__dict__+"get_all_anime()")
     return animeList
 
 def get_episode(bangumiid:str,db:str):
