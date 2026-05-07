@@ -5,6 +5,8 @@ import os
 import version
 import datetime
 import time
+import service
+import sys
 
 # 获取core当前版本信息
 core_db_version = version.db_version
@@ -27,35 +29,44 @@ if db_version is None:
 db_version_tuple = tuple(map(int, db_version.split('.')))
 
 def update():
-    basis.log(f"core_db_version: {core_db_version}, db_version: {db_version}", "INFO")
+    basis.log(f"数据库|最新版本: {core_db_version}, 当前版本: {db_version}", "INFO", "update.update()")
+    
+    basis.log(f"配置文件|最新版本: {core_config_version}, 当前版本: {config_version}", "INFO", "update.update()")
 
-    basis.log(f"core_config_version: {core_config_version}, config_version: {config_version}", "INFO")
+    service.send_msg(f"数据库|当前版本: {db_version}，最新版本: {core_db_version}", "INFO")
+    service.send_msg(f"配置文件|当前版本: {config_version}，最新版本: {core_config_version}", "INFO")
     if core_config_version_tuple > config_version_tuple:
         '''
         更新config
         '''
-        basis.log(f"Update config file...", "INFO")
+        
+        basis.log(f"更新配置文件...", "INFO", "update.update()")
         update_config()
-    
+        basis.log(f"配置文件更新完成，程序将自动关闭，当前版本: {basis.get_config_value('conf', 'version_help')},如需使用新版本功能请前往config.ini中补充所需配置", "INFO", "update.update()")
+        service.send_msg(f"配置文件更新完成，当前版本: {basis.get_config_value('conf', 'version_help')},如需使用新版本功能请前往config.ini中补充所需配置", "INFO")
+        time.sleep(5)
+        sys.exit(1)
 
     if core_db_version_tuple > db_version_tuple:
         '''
         更新数据库
         '''
-        basis.log(f"Update database file...", "INFO")
+        basis.log(f"更新数据库文件...", "INFO", "update.update()")
         update_db()
         '''
         更新数据
         '''
-        basis.log(f"Update data...", "INFO")
+        basis.log(f"更新数据...", "INFO", "update.update()")
         update_data()
+
+    service.send_msg(f"更新完成，数据库版本: {database.get_config('version')}，配置文件版本: {basis.get_config_value('conf', 'version_help')}", "INFO")
 
 
 
 def update_config():
     os.rename('config.ini', 'config.ini.bak')
     basis.createConfig()
-    basis.log("Config file updated. Old config file renamed to config.ini.bak", "INFO")
+    basis.log("配置文件开始更新...旧版本配置文件将重命名为config.ini.bak", "INFO", "update.update_config()")
     config = configparser.ConfigParser(interpolation=None)
     config.read('config.ini', encoding='utf-8')
     oldConfig = configparser.ConfigParser(interpolation=None)
@@ -66,9 +77,10 @@ def update_config():
             # 以_help结尾的配置项不进行更新（通常为注释项，例外包括version_help版本号）
             if not key.endswith('_help'):
                 config.set(conf, key, value)
-                basis.log(f"Config file updated. {key} = {value}", "INFO")
+                
     with open('config.ini', 'w', encoding='utf-8') as configfile:
         config.write(configfile)
+    basis.log(f"配置文件已更新。 {key} = {value}", "INFO" , "update.update_config()")
     os.rename('config.ini.bak', 'config.bak.'+datetime.date.today().strftime("%Y%m%d")+str(time.time() * 1000))
 
 

@@ -1,5 +1,4 @@
 import datetime
-import re
 import configparser
 import os
 import basis
@@ -9,6 +8,7 @@ import dao
 import logging
 import version as version
 import anitopy
+import service
 
 def initLogger():
     '''
@@ -44,7 +44,7 @@ def initLogger():
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
-def log(message: str, level: str ):
+def log(message: str, level: str ,path: str):
     '''
     log 的 Docstring
     打印日志信息
@@ -54,13 +54,14 @@ def log(message: str, level: str ):
 
     match level:
         case 'INFO':
-            logger.info(colored(f"[{datetime.datetime.now()}] [INFO] {message}", "green"))
+            logger.info(colored(f"[{datetime.datetime.now()}] [INFO] ({path}) {message}", "green"))
         
         case 'WARNING':
-            logger.warning(colored(f"[{datetime.datetime.now()}] [WARNING] {message}", "yellow"))
+            logger.warning(colored(f"[{datetime.datetime.now()}] [WARNING] ({path}) {message}", "yellow"))
             
         case 'ERROR':
-            logger.error(colored(f"[{datetime.datetime.now()}] [ERROR] {message}", "red"))
+            logger.error(colored(f"[{datetime.datetime.now()}] [ERROR] ({path}) {message}", "red"))
+            service.send_msg(f"[{datetime.datetime.now()}] [ERROR] ({path}) {message}", "ERROR")
 
     # print(f"[{datetime.datetime.now()}] {message}")
 
@@ -102,15 +103,38 @@ def getEpisode(title):
     #     basis.log(f"Error occurred while extracting episode number from title: {title}", "warning")
     info = anitopy.parse(title)
     try:
-        episode = info.get('episode_number')
+        if not isinstance(info.get('episode_number'),list):
+            episode = info.get('episode_number')
+        else:
+            episode = "other"
     except Exception as e:
 
         episode = "other"
 
-        basis.log(f"Error occurred while extracting episode number from title: {title}", "warning")
+        basis.log(f"无法通过文件名获取集数信息: {title}", "warning", "basis.getEpisode()")
    
    
     return episode
+
+def getInfoFromFileName(episode:dao.episode):
+        '''
+        v0.2.2新增方法
+        从文件名中获取字段信息
+        '''
+
+        info = anitopy.parse(episode.title)
+        episode.anime_year = info.get('anime_year')
+        episode.audio_term = info.get('audio_term')
+        episode.anime_title = info.get('anime_title')
+        episode.episode_title = info.get('episode_title')
+        episode.file_checksum = info.get('file_checksum')
+        episode.file_extension = info.get('file_extension')
+        episode.release_group = info.get('release_group')
+        episode.release_version = info.get('release_version')
+        episode.video_resolution = info.get('video_resolution')
+        episode.video_term = info.get('video_term')
+        
+
 
 def get_config_value(section, option):
     
@@ -175,6 +199,7 @@ def createConfig():
             'password': 'password',
             'download_tag': 'RSSAnimeTool',
             }
+    # ⬇v0.2.2新增
     config['transmission'] = {
             'host_help': '⬇transmission 地址。eg:127.0.0.1',
             'host': 'transmission.com',
@@ -187,6 +212,23 @@ def createConfig():
             'label_help': '⬇transmission 标签组',
             'label': 'RSSAnimeTool',
     }
+    # ⬇v0.2.2新增
+    config['WeChat'] = {
+            'Wechat_help': '⬇企业微信通知配置',
+            'Wechat_enable': False,
+            'corp_id_help': '⬇企业ID,每个企业都拥有唯一的corpid，获取此信息可在管理后台“我的企业”－“企业信息”下查看“企业ID”（需要有管理员权限）',
+            'corpid': 'corpID',
+            'corpsecret_help': '⬇secret是企业应用里面用于保障数据安全的“钥匙”，每一个应用都有一个独立的访问密钥，为了保证数据的安全，secret务必不能泄漏。secret查看方法：在管理后台->“应用管理”->“应用”->“自建”，点进某个应用，即可看到。',
+            'corpsecret': 'SECRET',
+            'touser_help': '⬇成员ID列表（消息接收者，多个接收者用‘|’分隔，最多支持1000个）。特殊情况：指定为@all，则向关注该企业应用的全部成员发送',
+            'touser': 'admin',
+            'toparty_help': '⬇部门ID列表，多个接收者用‘|’分隔，最多支持100个。当touser为@all时忽略本参数',
+            'toparty': 'admin',
+            'totag_help': '⬇标签ID列表，多个接收者用‘|’分隔，最多支持100个。当touser为@all时忽略本参数',
+            'totag': 'admin',
+            'agentid_help': '⬇企业应用的id，整型。企业内部开发，可在应用的设置页面查看；第三方服务商，可通过接口 获取企业授权信息 获取该参数值',
+            'agentid': 'admin',
+            }
 
     with open('config.ini', 'w', encoding='utf-8') as configfile:
             config.write(configfile)
@@ -197,11 +239,11 @@ def initConfig():
     初始化配置文件，如果不存在则创建一个默认的配置文件
     '''
     if not os.path.exists('config.ini'):
-        basis.log("Config file not found. Creating default config.ini...", "WARNING")   
+        basis.log("未发现配置文件，创建默认配置文件", "WARNING", "basis.initConfig()")   
         createConfig()
         return False
     else:
-        basis.log("Config file found. Loading config.ini...", "INFO")
+        basis.log("发现配置文件，读取配置文件...", "INFO", "basis.initConfig()")
         return True
     
 def get_season():

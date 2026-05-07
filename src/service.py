@@ -4,6 +4,7 @@ import database
 import downloader
 import basis
 import dao
+import wechat
 
 
 def get_more_episodes(anime:dao.anime ,client , torrentlink:str):
@@ -25,7 +26,7 @@ def get_more_episodes(anime:dao.anime ,client , torrentlink:str):
     moreEpList = rss.get_rss_toList(rssLink)
     for item in moreEpList:
         if item.torrentlink != torrentlink:
-            basis.log("Found additional episode: "+item.title , "INFO")
+            basis.log("发现未下载剧集: "+item.title , "INFO", "service.get_more_episodes()")
             item.isrealtime = 0
             item = crawler.upd_episode_info(item)
             database.add_episode(item)
@@ -49,7 +50,7 @@ def get_episodes_by_animeRSS(client):
     1、获取数据库中本季度番剧列表
 
     '''
-    basis.log("Getting anime info by anime RSS feed", "INFO")
+    basis.log("开始遍历近两季度已订阅动画RSS链接", "INFO", "service.get_episodes_by_animeRSS()")
     monthList = basis.get_season()
     animeList = database.get_anime_by_month(monthList[0].year, monthList[0].month)+database.get_anime_by_month(monthList[1].year, monthList[1].month)
     for anime in animeList:
@@ -59,3 +60,11 @@ def get_episodes_by_animeRSS(client):
 
     return None
 
+def send_msg(msg:str,msg_type:str="INFO"):
+    '''
+    v0.2.2新增方法，各平台信息推送
+    '''
+    if basis.get_config_value("WeChat", "Wechat_enable"):
+        wechat.send_message(None , f"[{msg_type}] {msg}")
+    
+    

@@ -55,7 +55,8 @@ def initDB():
              PATH TEXT,
              TIME DATETIME,
              SOURCE TEXT,
-             RSSLINK TEXT
+             RSSLINK TEXT,
+             WHEREFROM TEXT
              );
              ''')
     conn.execute('''
@@ -69,7 +70,17 @@ def initDB():
              SUBTITLE TEXT,
              TIME DATETIME,
              ISREALTIME INTEGER,
-             DOWNLOAD INTEGER DEFAULT 0
+             DOWNLOAD INTEGER DEFAULT 0,
+             ANIME_YEAR TEXT,
+             AUDIO_TERM TEXT,
+             ANIME_TITLE TEXT,
+             EPISODE_TITLE TEXT,
+             FILE_CHECKSUM TEXT,
+             FILE_EXTENSION TEXT,
+             RELEASE_GROUP TEXT,
+             RELEASE_VERSION TEXT,
+             VIDEO_RESOLUTION TEXT,
+             VIDEO_TERM TEXT
              );
              ''')
     conn.execute('''
@@ -82,6 +93,8 @@ def initDB():
     if conn.execute('SELECT * FROM CONFIG WHERE KEY = ?;', ('version',)).fetchone() is None:
         conn.execute('''INSERT INTO CONFIG (KEY, VALUE) VALUES (?, ?)''', ('version', version,))
 
+    if conn.execute('SELECT * FROM CONFIG WHERE KEY = ?;', ('wechat_access_token',)).fetchone() is None:
+        conn.execute('''INSERT INTO CONFIG (KEY, VALUE) VALUES (?, ?)''', ('wechat_access_token', '',))
     conn.commit()
     conn.close()
 
@@ -140,8 +153,8 @@ def add_episode(episode:dao.episode):
     """
 
     conn = sqlite3.connect(db)
-    conn.execute('''INSERT INTO EPISODE (TITLE, BANGUMIID, EPISODE, MIKANLINK, TORRENTLINK, SUBTITLE, TIME, ISREALTIME, DOWNLOAD)
-                        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)''', (episode.title, episode.bangumiid, episode.episode, episode.mikanlink, episode.torrentlink, episode.subtitle, episode.isrealtime, episode.download,))
+    conn.execute('''INSERT INTO EPISODE (TITLE, BANGUMIID, EPISODE, MIKANLINK, TORRENTLINK, SUBTITLE, TIME, ISREALTIME, DOWNLOAD, ANIME_YEAR, AUDIO_TERM, ANIME_TITLE, EPISODE_TITLE, FILE_CHECKSUM, FILE_EXTENSION, RELEASE_GROUP, RELEASE_VERSION, VIDEO_RESOLUTION, VIDEO_TERM)
+                        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (episode.title, episode.bangumiid, episode.episode, episode.mikanlink, episode.torrentlink, episode.subtitle, episode.isrealtime, episode.download, episode.anime_year, episode.audio_term, episode.anime_title, episode.episode_title, episode.file_checksum, episode.file_extension, episode.release_group, episode.release_version, episode.video_resolution, episode.video_term,))
     
     conn.commit()
     conn.close()
@@ -193,7 +206,7 @@ def add_anime(anime:dao.anime):
         conn.execute('''INSERT INTO ANIME (NAME, SEASON, YEAR, MONTH, BANGUMIID, BANGUMILINK, PATH, TIME , SOURCE , RSSLINK)
                         VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)''', 
                         (anime.name, anime.season, anime.year, anime.month, anime.bangumiid, anime.bangumilink, anime.path ,  anime.source, anime.rsslink,))
-        basis.log("Inserted new anime: "+anime.name , "INFO")
+        basis.log("已添加: "+anime.name , "INFO", "database.add_anime()")
     else:
 
         conn.execute('''INSERT INTO ANIME (NAME, SEASON, YEAR, MONTH, BANGUMIID, BANGUMILINK, PATH, TIME , SOURCE , RSSLINK)

@@ -12,6 +12,17 @@ class episode:
     time = ""
     isrealtime = 0
     download = 0
+    anime_year = ""
+    audio_term=""
+    anime_title=""
+    episode_title=""
+    file_checksum=""
+    file_extension=""
+    release_group=""
+    release_version=""
+    video_resolution=""
+    video_term=""
+
     def __init__(self, title= "", bangumiid= "", episode= "", mikanlink= "", torrentlink= "", subtitle= "", time= "", isrealtime=0, download= 0):
         self.title = title
         self.bangumiid = bangumiid
@@ -22,6 +33,16 @@ class episode:
         self.time = time
         self.isrealtime = isrealtime
         self.download = download
+        self.anime_year = ""
+        self.audio_term = ""
+        self.anime_title = ""
+        self.episode_title = ""
+        self.file_checksum = ""
+        self.file_extension = ""
+        self.release_group = ""
+        self.release_version = ""
+        self.video_resolution = ""
+        self.video_term = ""
     def isNull(self):
         if self.torrentlink == "":
             return True
@@ -43,11 +64,19 @@ class episode:
         self.isrealtime = result['ISREALTIME']
         self.download = result['DOWNLOAD']
 
+    
+        pass
     def complete(self):
         '''
         v0.2.0新增方法
         补全episode对象的字段
         '''
+        '''
+        v0.2.2新增字段
+        anime_year,audio_term,anime_title,episode_title,file_checksum,file_extension,release_group,release_version,video_resolution,video_term
+        '''
+        import basis
+        basis.getInfoFromFileName(self)
         pass
         
 class anime:
@@ -62,8 +91,9 @@ class anime:
     time = "datetime('now')"
     source = ""
     rsslink = ""
+    whereFrom = ""
 
-    def __init__(self, name='', season='', year='', month='', bangumiid='', bangumilink='', fin=0, path='', time='', source='', rsslink=''):
+    def __init__(self, name='', season='', year='', month='', bangumiid='', bangumilink='', fin=0, path='', time='', source='', rsslink='', whereFrom=''):
         self.name = name
         self.season = season
         self.year = year
@@ -75,6 +105,7 @@ class anime:
         self.time = time
         self.source = source
         self.rsslink = rsslink
+        self.whereFrom = whereFrom
 
     def isNull(self):
 
@@ -98,13 +129,19 @@ class anime:
         self.path = result['PATH']
         self.time = result['TIME']
         self.source = result['SOURCE']
+        
         try:
             '''
             v0.2.0新增字段RSSLINK
             '''
             self.rsslink = result['RSSLINK']
+            '''
+            v0.2.2新增字段RSSLINK
+            '''
+            self.whereFrom = result['WHEREFROM']
         except:
             self.rsslink = ""
+            self.whereFrom = ""
         
 
     def complete(self):
@@ -121,3 +158,8 @@ class anime:
         if self.rsslink == "":
             episode = database.get_episode(self.bangumiid,'RSSAnime.db.bak')[0]
             self.rsslink = crawler.get_more_episode_rss(episode['mikanlink'])
+        '''
+        v0.2.2新增字段whereFrom
+        '''
+        if self.whereFrom == "":
+            self.whereFrom = "RSS"

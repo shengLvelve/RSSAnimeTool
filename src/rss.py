@@ -29,12 +29,12 @@ def get_rss_toList(RSS_url:str):
         response.raise_for_status()
         RSS = fastfeedparser.parse(response.text)
     except Exception as e:
-        basis.log("Failed to fetch RSS feed: "+str(e), "ERROR")
+        basis.log("获取RSS失败，失败原因: "+str(e), "ERROR", "crawler.get_rss_toList()")
         while RSS.entries is None:
-            basis.log("Retrying to fetch RSS feed...", "WARNING")
+            basis.log("尝试重新获取RSS...", "WARNING", "crawler.get_rss_toList()")
             
             RSS = fastfeedparser.parse(RSS_url)
-            basis.log("Failed to fetch RSS feed: "+str(e), "ERROR")
+            basis.log("获取RSS失败，失败原因: "+str(e), "ERROR", "crawler.get_rss_toList()")
             time.sleep(10)  # 等待10秒后重试
 
         
@@ -43,6 +43,7 @@ def get_rss_toList(RSS_url:str):
         # if lastEP.torrentlink != entry.enclosures[0]['url']:
         if not database.check_episode_exists(entry.enclosures[0]['url']):
             ep = dao.episode(entry.title, "", basis.getEpisode(entry.title), entry.link, entry.enclosures[0]['url'], "", "datetime('now')", 1, 0)
+            basis.getInfoFromFileName(ep)
             templist.append(ep)
         """
         else:
