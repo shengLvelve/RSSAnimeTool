@@ -65,7 +65,7 @@ def send_msg(msg:str,msg_type:str="INFO"):
     v0.2.2新增方法，各平台信息推送
     '''
     if basis.get_config_value("WeChat", "Wechat_enable") == "True":
-        if basis.get_config_value("conf", "dev_mode"):
+        if basis.get_config_value("conf", "dev_mode") == "True":
             wechat.send_message(None , f"(dev)[{msg_type}] {msg}")
         else:
             wechat.send_message(None , f"[{msg_type}] {msg}")
