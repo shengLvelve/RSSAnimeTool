@@ -35,11 +35,13 @@ def update():
 
     service.send_msg(f"数据库|当前版本: {db_version}，最新版本: {core_db_version}", "INFO")
     service.send_msg(f"配置文件|当前版本: {config_version}，最新版本: {core_config_version}", "INFO")
+    config_upd_flag=0
+    db_upd_flag=0
     if core_config_version_tuple > config_version_tuple:
         '''
         更新config
         '''
-        
+        config_upd_flag=1
         basis.log(f"更新配置文件...", "INFO", "update.update()")
         update_config()
         basis.log(f"配置文件更新完成，程序将自动关闭，当前版本: {basis.get_config_value('conf', 'version_help')},如需使用新版本功能请前往config.ini中补充所需配置", "INFO", "update.update()")
@@ -51,6 +53,7 @@ def update():
         '''
         更新数据库
         '''
+        db_upd_flag=1
         basis.log(f"更新数据库文件...", "INFO", "update.update()")
         update_db()
         '''
@@ -58,8 +61,8 @@ def update():
         '''
         basis.log(f"更新数据...", "INFO", "update.update()")
         update_data()
-
-    service.send_msg(f"更新完成，数据库版本: {database.get_config('version')}，配置文件版本: {basis.get_config_value('conf', 'version_help')}", "INFO")
+    if config_upd_flag==1 or db_upd_flag==1:
+        service.send_msg(f"更新完成，数据库版本: {database.get_config('version')}，配置文件版本: {basis.get_config_value('conf', 'version_help')}", "INFO")
 
 
 

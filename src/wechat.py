@@ -106,7 +106,7 @@ def send_message_card(access_token, episode):
     downloader_url = ""
     match downloader:
         case "qbittorrent":
-            downloader_url = basis.get_config_value('qbittorrent', 'host')
+            downloader_url = "http://"+basis.get_config_value('qbittorrent', 'host')
         case "transmission":
             downloader_url = basis.get_config_value('transmission', 'host')+":"+basis.get_config_value('transmission', 'port')
     jellyfin_url = basis.get_config_value('conf', 'jellyfin_host')    
