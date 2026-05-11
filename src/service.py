@@ -5,6 +5,7 @@ import downloader
 import basis
 import dao
 import wechat
+import datetime
 
 
 def get_more_episodes(anime:dao.anime ,client , torrentlink:str):
@@ -60,15 +61,25 @@ def get_episodes_by_animeRSS(client):
 
     return None
 
-def send_msg(msg:str,msg_type:str="INFO"):
+def send_msg(msg,msg_type:str="INFO",type:str="text"):
     '''
     v0.2.2新增方法，各平台信息推送
     '''
     if basis.get_config_value("WeChat", "Wechat_enable") == "True":
-        if basis.get_config_value("conf", "dev_mode") == "True":
-            wechat.send_message(None , f"(dev)[{msg_type}] {msg}")
-        else:
-            wechat.send_message(None , f"[{msg_type}] {msg}")
+        match type:
+            case "text":
+            
+                if basis.get_config_value("conf", "dev_mode") == "True":
+                    wechat.send_message(None , f"(dev)[{msg_type}]{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n {msg}")
+                else:
+                    wechat.send_message(None , f"[{msg_type}] {msg}")
+                pass
+            case "template_card":
+                wechat.send_message_card(None, msg)
+                pass
+
+
+
         
     
     

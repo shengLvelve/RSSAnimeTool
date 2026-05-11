@@ -140,7 +140,7 @@ def qbittorrent_download(ep:dao.episode, savePath, client, tag):
         # 更新数据库下载状态
         database.upd_download_status("1",ep.torrentlink)
         basis.log("qBittorrent成功添加: "+ep.title, "INFO", "downloader.qbittorrent_download()")
-        service.send_msg(f"已添加到qBittorrent: {ep.title}", "INFO")
+        service.send_msg(ep, "INFO","template_card")
         return 1
     
 def transmission_download(ep:dao.episode, savePath, client:trClient):
@@ -162,7 +162,7 @@ def transmission_download(ep:dao.episode, savePath, client:trClient):
         # 更新数据库下载状态
         database.upd_download_status("1",ep.torrentlink)
         basis.log("Transmission成功添加: "+ep.title, "INFO", "downloader.transmission_download()")
-        service.send_msg(f"已添加到Transmission: {ep.title}", "INFO")
+        service.send_msg(ep, "INFO","template_card")
         return 1
     
     return 1

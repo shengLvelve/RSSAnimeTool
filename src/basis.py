@@ -177,7 +177,10 @@ def createConfig():
             # ⬇v0.2.0新增
             'console_display' : False,
             # ⬇v0.2.0新增
-            'version_help' : version.config_version
+            'version_help' : version.config_version,
+            # ⬇v0.2.2新增
+            'jellyfin_host_help' : '⬇jellyfin_host jellyfin 地址，用于企业微信推送中的jellyfin链接',
+            'jellyfin_host' : 'jellyfin.com'
             }
     config['RSS'] = {
             'url_help': 'RSS 订阅地址',

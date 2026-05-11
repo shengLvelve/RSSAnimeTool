@@ -1,6 +1,7 @@
 import requests
 import database
 import basis
+import datetime
 
 
 def get_access_token():
@@ -86,6 +87,99 @@ def send_message(access_token, message):
             basis.log(f"企业微信access_token失效, 重新获取access_token", "WARNING", "wechat.send_message()")
             return None
 
+def send_message_card(access_token, episode):
+    """
+    发送消息到企业微信-消息卡片
     
+    Args:
+        access_token (str): 微信API访问令牌
+        message (str): 要发送的消息内容
+        touser (str): 接收消息的用户ID列表
+        toparty (str): 接收消息的部门ID列表
+        totag (str): 接收消息的标签ID列表
+        agentid (int): 企业微信应用的AgentID
+    
+    Returns:
+        dict: 微信API的响应结果，如果发送失败则返回None
+    """
+    downloader = basis.get_config_value('download', 'download_tool')
+    downloader_url = ""
+    match downloader:
+        case "qbittorrent":
+            downloader_url = basis.get_config_value('qbittorrent', 'host')
+        case "transmission":
+            downloader_url = basis.get_config_value('transmission', 'host')+":"+basis.get_config_value('transmission', 'port')
+    jellyfin_url = basis.get_config_value('conf', 'jellyfin_host')    
+
+    if access_token is None:
+        try:
+            access_token = get_access_token()
+        except:
+            basis.log("企业微信access_token获取失败,企业微信推送失败", "ERROR", "wechat.send_message()")
+            return None
+    touser = basis.get_config_value('WeChat', 'touser')
+    toparty = basis.get_config_value('WeChat', 'toparty')
+    totag = basis.get_config_value('WeChat', 'totag')
+    agentid = basis.get_config_value('WeChat', 'agentid')
+
+    url = f"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}"
+    # print("请求URL:", url)  # 打印请求URL以供调试
+    params = {
+        "touser": touser,
+        "toparty": toparty,
+        "totag": totag,
+        "msgtype": "template_card",
+        "agentid": agentid,
+        "template_card":{
+            "card_type":"text_notice",
+            "source":{
+                "desc":"RSSAnimeTool",
+                "desc_color":0
+            },
+            "main_title":{
+                "title":database.get_anime(episode.bangumiid).name,
+                # episode.anime_title,
+                "desc":f"已推送至{downloader}下载"
+            },
+            "emphasis_content":{
+                "title":f"Ep{episode.episode}",
+                "desc":datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            },
+            "jump_list":[
+                {
+                    "type":1,
+                    "url":jellyfin_url,
+                    "title":"Jellyfin"
+                },
+                {
+                    "type":1,
+                    "url":downloader_url,
+                    "title":downloader
+                }
+            ],
+            "card_action":{
+                "type":1,
+                "url":jellyfin_url,
+                "appid":"APPID",
+                "pagepath":"PAGEPATH"
+            }
+        
+        },
+        "safe": 0,
+        "enable_id_trans": 0,
+        "enable_duplicate_check": 0
+    } # 这里的参数会自动拼接到 URL 后
+
+    response = requests.post(url, json=params)
+    data = response.json()  # 自动将返回的 JSON 转为 Python 字典
+# 检查状态码是否为 200 (成功)
+    if data.get('errcode') == 0:
+        basis.log(f"企业微信推送消息成功, response: {data}", "INFO", "wechat.send_message()")
+    else:
+        basis.log(f"企业微信推送消息失败, status code: {data.get('errcode')}", "ERROR", "wechat.send_message()")
+        if data.get('errcode') == 40014: # access_token无效
+            get_access_token()
+            basis.log(f"企业微信access_token失效, 重新获取access_token", "WARNING", "wechat.send_message()")
+            return None    
 
 
